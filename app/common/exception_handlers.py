@@ -75,5 +75,5 @@ exc_handlers = {
     HTTPException: http_exception_handler,
     RequestValidationError: validation_exception_handler,
     RequestError: request_error_handler,
-    # HTTP_500_INTERNAL_SERVER_ERROR: internal_server_error_handler,
+    Exception: internal_server_error_handler,
 }

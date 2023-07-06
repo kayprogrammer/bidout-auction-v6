@@ -1,6 +1,6 @@
 from sqlalchemy.sql import text
 from sqlalchemy.ext.asyncio import async_sessionmaker
-from app.core.database import sqlalchemy_config
+from app.core.database import engine
 
 import logging, asyncio
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 max_tries = 60 * 5  # 5 minutes
 wait_seconds = 1
 
-AsyncSessionLocal = async_sessionmaker(sqlalchemy_config.engine, expire_on_commit=False)
+AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 
 @retry(

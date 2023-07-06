@@ -1,12 +1,7 @@
+from fastapi import HTTPException, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from http import HTTPStatus
-from starlite import (
-    HTTPException,
-    ValidationException,
-    Response,
-    Request,
-    status_codes,
-)
-from starlite.status_codes import HTTP_500_INTERNAL_SERVER_ERROR
 
 
 class Error(Exception):
@@ -26,26 +21,27 @@ class RequestError(Error):
         super().__init__(*args)
 
 
-def request_error_handler(_: Request, exc: RequestError):
+def request_error_handler(request, exc: RequestError):
     err_dict = {
         "status": "failure",
         "message": exc.err_msg,
     }
     if exc.data:
         err_dict["data"] = exc.data
-    return Response(status_code=exc.status_code, content=err_dict)
+    return JSONResponse(status_code=exc.status_code, content=err_dict)
 
 
-def http_exception_handler(_: Request, exc: HTTPException) -> Response:
-    return Response(
-        content={"status": "failure", "message": exc.detail},
-        status_code=exc.status_code,
-    )
+def http_exception_handler(request, exc):
+    if isinstance(exc, HTTPException):
+        return JSONResponse(
+            content={"status": "failure", "message": exc.detail},
+            status_code=exc.status_code,
+        )
 
 
-def validation_exception_handler(_: Request, exc: ValidationException) -> Response:
+def validation_exception_handler(request, exc: RequestValidationError):
     # Get the original 'detail' list of errors
-    details = exc.extra
+    details = exc.errors()
     modified_details = {}
     for error in details:
         try:
@@ -54,8 +50,8 @@ def validation_exception_handler(_: Request, exc: ValidationException) -> Respon
             field_name = error["loc"][0]
 
         modified_details[f"{field_name}"] = error["msg"]
-    return Response(
-        status_code=status_codes.HTTP_422_UNPROCESSABLE_ENTITY,
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={
             "status": "failure",
             "message": "Invalid Entry",
@@ -64,20 +60,20 @@ def validation_exception_handler(_: Request, exc: ValidationException) -> Respon
     )
 
 
-def internal_server_error_handler(_: Request, exc: Exception) -> Response:
+def internal_server_error_handler(request, exc: Exception):
     print(exc)
-    return Response(
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "status": "failure",
             "message": "Server Error",
         },
-        status_code=500,
     )
 
 
 exc_handlers = {
-    ValidationException: validation_exception_handler,
     HTTPException: http_exception_handler,
-    HTTP_500_INTERNAL_SERVER_ERROR: internal_server_error_handler,
+    RequestValidationError: validation_exception_handler,
     RequestError: request_error_handler,
+    # HTTP_500_INTERNAL_SERVER_ERROR: internal_server_error_handler,
 }

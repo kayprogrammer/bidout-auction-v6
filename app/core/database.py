@@ -1,23 +1,18 @@
-from starlite.plugins.sql_alchemy import SQLAlchemyConfig, SQLAlchemyPlugin
-from starlite.middleware.session.sqlalchemy_backend import (
-    SQLAlchemyBackendConfig,
-    create_session_model,
-)
-
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 from .config import settings
 
 Base = declarative_base()
 
-sqlalchemy_config = SQLAlchemyConfig(
-    connection_string=settings.SQLALCHEMY_DATABASE_URL,
-    dependency_key="db",
-)
+engine = create_async_engine(settings.SQLALCHEMY_DATABASE_URL)
 
-sqlalchemy_plugin = SQLAlchemyPlugin(config=sqlalchemy_config)
+SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
-SessionModel = create_session_model(Base)
 
-session_config = SQLAlchemyBackendConfig(
-    plugin=sqlalchemy_plugin, model=SessionModel, samesite="none", secure=True
-)
+async def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        await db.close()

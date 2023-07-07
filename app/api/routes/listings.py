@@ -34,7 +34,7 @@ router = APIRouter()
 
 
 @router.get(
-    "/",
+    "",
     summary="Retrieve all listings",
     description="This endpoint retrieves all listings",
     responses={200: {"model": ListingsResponseSchema}},
@@ -62,7 +62,7 @@ async def retrieve_listings(
         )
         for listing in listings
     ]
-    return {"message": "Listings fetched", "data": data}
+    return ListingsResponseSchema(message="Listings fetched", data=data)
 
 
 @router.get(
@@ -83,7 +83,7 @@ async def retrieve_listing_detail(slug: str, db: AsyncSession = Depends(get_db))
         listing=ListingDataSchema.from_orm(listing),
         related_listings=related_listings,
     )
-    return {"message": "Listing details fetched", "data": data}
+    return ListingResponseSchema(message="Listing details fetched", data=data)
 
 
 @router.get(
@@ -107,7 +107,7 @@ async def retrieve_watchlist(
         )
         for watchlist in watchlists
     ]
-    return {"message": "Watchlist Listings fetched", "data": data}
+    return ListingsResponseSchema(message="Watchlist Listings fetched", data=data)
 
 
 @router.post(
@@ -153,7 +153,10 @@ async def add_or_remove_watchlist_listings(
 
     guestuser_id = client.id if isinstance(client, GuestUser) else None
     return JSONResponse(
-        {"message": resp_message, "data": {"guestuser_id": str(guestuser_id)}},
+        AddOrRemoveWatchlistResponseSchema(
+            message=resp_message,
+            data={"guestuser_id": str(guestuser_id) if guestuser_id else None},
+        ).dict(),
         status_code=status_code,
     )
 
@@ -167,7 +170,7 @@ async def retrieve_categories(
     db: AsyncSession = Depends(get_db),
 ) -> CategoriesResponseSchema:
     categories = await category_manager.get_all(db)
-    return CategoriesResponseSchema(message="Categories fetched", data=categories)
+    return {"message": "Categories fetched", "data": categories}
 
 
 @router.get(
@@ -201,7 +204,7 @@ async def retrieve_category_listings(
         )
         for listing in listings
     ]
-    return {"message": "Category Listings fetched", "data": data}
+    return ListingsResponseSchema(message="Category Listings fetched", data=data)
 
 
 @router.get(
@@ -216,13 +219,13 @@ async def retrieve_listing_bids(slug: str, db: AsyncSession = Depends(get_db)):
         raise RequestError(err_msg="Listing does not exist!", status_code=404)
 
     bids = (await bid_manager.get_by_listing_id(db, listing.id))[:3]
-    return {
-        "message": "Listing Bids fetched",
-        "data": {
+    return BidsResponseSchema(
+        message="Listing Bids fetched",
+        data={
             "listing": listing.name,
             "bids": [BidDataSchema.from_orm(bid) for bid in bids],
         },
-    }
+    )
 
 
 @router.post(
@@ -272,4 +275,4 @@ async def create_bid(
     await listing_manager.update(
         db, listing, {"highest_bid": amount, "bids_count": bids_count}
     )
-    return {"message": "Bid added to listing", "data": BidDataSchema.from_orm(bid)}
+    return BidResponseSchema(message="Bid added to listing", data=bid)

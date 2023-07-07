@@ -37,7 +37,7 @@ initial_data:
 	python initials/initial_data.py
 
 tests:
-	pytest --disable-warnings -vv -x
+	pytest app/api/tests/test_listings.py --disable-warnings -vv -x
 
 requirements:
 	pip install -r requirements.txt

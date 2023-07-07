@@ -50,8 +50,7 @@ async def subscribe(
     "/reviews",
     summary="Retrieve site reviews",
     description="This endpoint retrieves a few reviews of the application",
-    responses={200: {"model": ReviewsResponseSchema}},
 )
-async def reviews(db: AsyncSession = Depends(get_db)):
+async def reviews(db: AsyncSession = Depends(get_db)) -> ReviewsResponseSchema:
     reviews = await review_manager.get_active(db)
-    return ReviewsResponseSchema(message="Reviews fetched", data=reviews)
+    return {"message": "Reviews fetched", "data": reviews}

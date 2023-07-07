@@ -5,10 +5,7 @@ from app.api.dependencies import get_client, get_current_user
 
 from app.api.schemas.listings import (
     AddOrRemoveWatchlistSchema,
-    BidDataSchema,
-    ListingDataSchema,
     ListingsResponseSchema,
-    ListingDetailDataSchema,
     ListingResponseSchema,
     CategoriesResponseSchema,
     CreateBidSchema,
@@ -37,13 +34,12 @@ router = APIRouter()
     "",
     summary="Retrieve all listings",
     description="This endpoint retrieves all listings",
-    responses={200: {"model": ListingsResponseSchema}},
 )
 async def retrieve_listings(
     quantity: int = None,
     db: AsyncSession = Depends(get_db),
     client: Optional[Union["User", "GuestUser"]] = Depends(get_client),
-):
+) -> ListingsResponseSchema:
 
     listings = await listing_manager.get_all(db)
     if quantity:
@@ -51,27 +47,28 @@ async def retrieve_listings(
         listings = listings[:quantity]
 
     data = [
-        ListingDataSchema(
-            watchlist=True
+        {
+            "watchlist": True
             if await watchlist_manager.get_by_client_id_and_listing_id(
                 db, client.id if client else None, listing.id
             )
             else False,
-            time_left_seconds=listing.time_left_seconds,
-            **listing.dict()
-        )
+            "time_left_seconds": listing.time_left_seconds,
+            **listing.dict(),
+        }
         for listing in listings
     ]
-    return ListingsResponseSchema(message="Listings fetched", data=data)
+    return {"message": "Listings fetched", "data": data}
 
 
 @router.get(
     "/detail/{slug:str}",
     summary="Retrieve listing's detail",
     description="This endpoint retrieves detail of a listing",
-    responses={200: {"model": ListingResponseSchema}},
 )
-async def retrieve_listing_detail(slug: str, db: AsyncSession = Depends(get_db)):
+async def retrieve_listing_detail(
+    slug: str, db: AsyncSession = Depends(get_db)
+) -> ListingResponseSchema:
     listing = await listing_manager.get_by_slug(db, slug)
     if not listing:
         raise RequestError(err_msg="Listing does not exist!", status_code=404)
@@ -79,35 +76,36 @@ async def retrieve_listing_detail(slug: str, db: AsyncSession = Depends(get_db))
     related_listings = (
         await listing_manager.get_related_listings(db, listing.category_id, slug)
     )[:3]
-    data = ListingDetailDataSchema(
-        listing=ListingDataSchema.from_orm(listing),
-        related_listings=related_listings,
-    )
-    return ListingResponseSchema(message="Listing details fetched", data=data)
+    return {
+        "message": "Listing details fetched",
+        "data": {
+            "listing": listing,
+            "related_listings": related_listings,
+        },
+    }
 
 
 @router.get(
     "/watchlist",
     summary="Retrieve all listings by users watchlist",
     description="This endpoint retrieves all listings",
-    responses={200: {"model": ListingsResponseSchema}},
 )
 async def retrieve_watchlist(
     db: AsyncSession = Depends(get_db),
     client: Optional[Union["User", "GuestUser"]] = Depends(get_client),
-):
+) -> ListingsResponseSchema:
     watchlists = await watchlist_manager.get_by_client_id(
         db, client.id if client else None
     )
     data = [
-        ListingDataSchema(
-            watchlist=True,
-            time_left_seconds=watchlist.listing.time_left_seconds,
-            **watchlist.listing.dict()
-        )
+        {
+            "watchlist": True,
+            "time_left_seconds": watchlist.listing.time_left_seconds,
+            **watchlist.listing.dict(),
+        }
         for watchlist in watchlists
     ]
-    return ListingsResponseSchema(message="Watchlist Listings fetched", data=data)
+    return {"message": "Watchlist Listings fetched", "data": data}
 
 
 @router.post(
@@ -153,10 +151,11 @@ async def add_or_remove_watchlist_listings(
 
     guestuser_id = client.id if isinstance(client, GuestUser) else None
     return JSONResponse(
-        AddOrRemoveWatchlistResponseSchema(
-            message=resp_message,
-            data={"guestuser_id": str(guestuser_id) if guestuser_id else None},
-        ).dict(),
+        {
+            "status": "success",
+            "message": resp_message,
+            "data": {"guestuser_id": str(guestuser_id) if guestuser_id else None},
+        },
         status_code=status_code,
     )
 
@@ -177,13 +176,12 @@ async def retrieve_categories(
     "/categories/{slug:str}",
     summary="Retrieve all listings by category",
     description="This endpoint retrieves all listings in a particular category. Use slug 'other' for category other",
-    responses={200: {"model": ListingsResponseSchema}},
 )
 async def retrieve_category_listings(
     slug: str,
     db: AsyncSession = Depends(get_db),
     client: Optional[Union["User", "GuestUser"]] = Depends(get_client),
-):
+) -> ListingsResponseSchema:
     # listings with category 'other' have category column as null
     category = None
     if slug != "other":
@@ -193,46 +191,46 @@ async def retrieve_category_listings(
 
     listings = await listing_manager.get_by_category(db, category)
     data = [
-        ListingDataSchema(
-            watchlist=True
+        {
+            "watchlist": True
             if await watchlist_manager.get_by_client_id_and_listing_id(
                 db, client.id if client else None, listing.id
             )
             else False,
-            time_left_seconds=listing.time_left_seconds,
-            **listing.dict()
-        )
+            "time_left_seconds": listing.time_left_seconds,
+            **listing.dict(),
+        }
         for listing in listings
     ]
-    return ListingsResponseSchema(message="Category Listings fetched", data=data)
+    return {"message": "Category Listings fetched", "data": data}
 
 
 @router.get(
     "/detail/{slug:str}/bids",
     summary="Retrieve bids in a listing",
     description="This endpoint retrieves at most 3 bids from a particular listing.",
-    responses={200: {"model": BidsResponseSchema}},
 )
-async def retrieve_listing_bids(slug: str, db: AsyncSession = Depends(get_db)):
+async def retrieve_listing_bids(
+    slug: str, db: AsyncSession = Depends(get_db)
+) -> BidsResponseSchema:
     listing = await listing_manager.get_by_slug(db, slug)
     if not listing:
         raise RequestError(err_msg="Listing does not exist!", status_code=404)
 
     bids = (await bid_manager.get_by_listing_id(db, listing.id))[:3]
-    return BidsResponseSchema(
-        message="Listing Bids fetched",
-        data={
+    return {
+        "message": "Listing Bids fetched",
+        "data": {
             "listing": listing.name,
-            "bids": [BidDataSchema.from_orm(bid) for bid in bids],
+            "bids": bids,
         },
-    )
+    }
 
 
 @router.post(
     "/detail/{slug:str}/bids",
     summary="Add a bid to a listing",
     description="This endpoint adds a bid to a particular listing.",
-    responses={201: {"model": BidResponseSchema}},
     status_code=201,
 )
 async def create_bid(
@@ -240,7 +238,7 @@ async def create_bid(
     data: CreateBidSchema,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
-):
+) -> BidResponseSchema:
     listing = await listing_manager.get_by_slug(db, slug)
     if not listing:
         raise RequestError(err_msg="Listing does not exist!", status_code=404)
@@ -275,4 +273,4 @@ async def create_bid(
     await listing_manager.update(
         db, listing, {"highest_bid": amount, "bids_count": bids_count}
     )
-    return BidResponseSchema(message="Bid added to listing", data=bid)
+    return {"message": "Bid added to listing", "data": bid}

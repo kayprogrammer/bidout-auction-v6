@@ -1,11 +1,7 @@
-from jinja2 import Environment, PackageLoader
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from .threads import EmailThread
+from fastapi import BackgroundTasks
+from fastapi_mail import MessageSchema, FastMail, MessageType
 from app.core.config import settings
 from app.db.managers.accounts import otp_manager
-
-env = Environment(loader=PackageLoader("app", "templates"))
 
 
 async def sort_email(db, user, type):
@@ -34,7 +30,7 @@ async def sort_email(db, user, type):
     return data
 
 
-async def send_email(db, user, type):
+async def send_email(background_tasks: BackgroundTasks, db, user, type):
     email_data = await sort_email(db, user, type)
     template_file = email_data["template_file"]
     subject = email_data["subject"]
@@ -44,16 +40,12 @@ async def send_email(db, user, type):
     if otp:
         context["otp"] = otp
 
-    # Render the email template using jinja
-    template = env.get_template(template_file)
-    html = template.render(context)
+    msg = MessageSchema(
+        subject=subject,
+        recipients=[user.email],
+        template_body=context,
+        subtype=MessageType.html,
+    )
 
-    # Create a message with the HTML content
-    message = MIMEMultipart()
-    message["From"] = settings.MAIL_SENDER_EMAIL
-    message["To"] = user.email
-    message["Subject"] = subject
-    message.attach(MIMEText(html, "html"))
-
-    # Send email in background
-    EmailThread(message).start()
+    fm = FastMail(settings.EMAIL_CONFIG)
+    background_tasks.add_task(fm.send_message, msg, template_name=template_file)

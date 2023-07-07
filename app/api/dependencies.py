@@ -9,10 +9,11 @@ from app.db.managers.base import guestuser_manager
 from app.db.models.accounts import User
 from app.db.models.base import GuestUser
 
-jwt_scheme = HTTPBearer()
+jwt_scheme = HTTPBearer(auto_error=False)
 guest_scheme = APIKeyHeader(
     name="guestuserid",
     description="For guest watchlists. Get ID from '/api/v6/listings/watchlist' POST endpoint",
+    auto_error=False,
 )
 
 
@@ -20,13 +21,12 @@ async def get_current_user(
     token: HTTPAuthorizationCredentials = Depends(jwt_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    print(token)
     if not token:
         raise RequestError(
             err_msg="Unauthorized User!",
             status_code=401,
         )
-    user = await Authentication.decodeAuthorization(db, token)
+    user = await Authentication.decodeAuthorization(db, token.credentials)
     if not user:
         raise RequestError(
             err_msg="Auth Token is Invalid or Expired",
@@ -36,12 +36,14 @@ async def get_current_user(
 
 
 async def get_client(
-    token: HTTPAuthorizationCredentials = Depends(jwt_scheme),
-    guest_id: str = Depends(guest_scheme),
+    token: Optional[HTTPAuthorizationCredentials] = Depends(jwt_scheme),
+    guest_id: Optional[str] = Depends(guest_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> Optional[Union[User, GuestUser]]:
     if token:
         user = await get_current_user(token, db)
         return user
-    guestuser = await guestuser_manager.get_by_id(db, guest_id)
-    return guestuser
+    elif guest_id:
+        guestuser = await guestuser_manager.get_by_id(db, guest_id)
+        return guestuser
+    return None

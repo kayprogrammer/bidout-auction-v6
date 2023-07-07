@@ -12,7 +12,11 @@ class Error(Exception):
 
 class RequestError(Error):
     def __init__(
-        self, err_msg: str, status_code: int = 400, data: dict = None, *args: object
+        self,
+        err_msg: str,
+        status_code: int = 400,
+        data: dict = None,
+        *args: object,
     ) -> None:
         self.status_code = HTTPStatus(status_code)
         self.err_msg = err_msg
@@ -41,7 +45,7 @@ def http_exception_handler(request, exc):
 
 def validation_exception_handler(request, exc: RequestValidationError):
     # Get the original 'detail' list of errors
-    details = exc.errors()
+    details = exc.raw_errors[0].exc.errors()
     modified_details = {}
     for error in details:
         try:

@@ -45,7 +45,7 @@ class Authentication:
         return decoded
 
     async def decodeAuthorization(db: AsyncSession, token: str):
-        decoded = await Authentication.decode_jwt(token[7:])
+        decoded = await Authentication.decode_jwt(token)
         if not decoded:
             return None
         jwt_obj = await jwt_manager.get_by_user_id(db, decoded["user_id"])

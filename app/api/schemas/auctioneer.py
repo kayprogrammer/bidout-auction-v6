@@ -1,6 +1,6 @@
 from typing import Optional, Any, Union
 
-from pydantic import BaseModel, validator, Field, StrictStr
+from pydantic import BaseModel, HttpUrl, validator, Field, StrictStr
 from datetime import datetime
 from uuid import UUID
 from .base import ResponseSchema
@@ -190,13 +190,13 @@ class UpdateProfileResponseSchema(ResponseSchema):
 class ProfileDataSchema(BaseModel):
     first_name: str
     last_name: str
-    avatar: Optional[Union[dict, str]]
+    avatar: Optional[HttpUrl]
 
     @validator("avatar", pre=True)
     def assemble_image_url(cls, v):
         if v:
             return FileProcessor.generate_file_url(
-                key=v["id"], folder="avatars", content_type=v["resource_type"]
+                key=v.id, folder="avatars", content_type=v.resource_type
             )
         return None
 

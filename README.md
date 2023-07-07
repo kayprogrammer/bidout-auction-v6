@@ -1,6 +1,6 @@
-# BidOut Auction V6 (WORK IN PROGRESS)
+# BidOut Auction V6
 
-![alt text](https://github.com/kayprogrammer/bidout-auction-v6/blob/main/display/litestar.svg?raw=true)
+![alt text](https://github.com/kayprogrammer/bidout-auction-v6/blob/main/display/fastapi.png?raw=true)
 
 
 #### FASTAPI DOCS: [Documentation](https://fastapi.tiangolo.com/)
@@ -48,9 +48,9 @@ OR
     $ make test
 ```
 
-<!-- ## Docs
-#### API Live Url: [BidOut Docs](https://bidout-litestar-api.cleverapps.io/) 
-#### React Live Url: [BidOut Auction](https://bidout2.netlify.app) 
+## Docs
+#### API Live Url: [BidOut Docs (Not Active Yet)](https://bidout-fastapi.cleverapps.io/) 
+#### React Live Url: [BidOut Auction (Not Active Yet)](https://bidout5.netlify.app) 
 #### Swagger: [Documentation](https://swagger.io/docs/)
 
 ![alt text](https://github.com/kayprogrammer/bidout-auction-v6/blob/main/display/display1.png?raw=true)
@@ -66,5 +66,3 @@ OR
 ![alt text](https://github.com/kayprogrammer/bidout-auction-v6/blob/main/display/display6.png?raw=true)
 
 ![alt text](https://github.com/kayprogrammer/bidout-auction-v6/blob/main/display/display7.png?raw=true)
-
-![alt text](https://github.com/kayprogrammer/bidout-auction-v6/blob/main/display/display8.png?raw=true) -->

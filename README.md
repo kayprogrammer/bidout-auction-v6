@@ -1,4 +1,4 @@
-# BidOut Auction V6
+# BIDOUT AUCTION V6
 
 ![alt text](https://github.com/kayprogrammer/bidout-auction-v6/blob/main/display/fastapi.png?raw=true)
 

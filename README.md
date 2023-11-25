@@ -49,7 +49,7 @@ OR
 ```
 
 ## Docs
-#### API Url: [BidOut Docs](http://127.0.0.1:8000/) 
+#### API Url: [BidOut Docs](https://bidout-fastapi.vercel.app/) 
 #### Swagger: [Documentation](https://swagger.io/docs/)
 
 ![alt text](https://github.com/kayprogrammer/bidout-auction-v6/blob/main/display/display1.png?raw=true)

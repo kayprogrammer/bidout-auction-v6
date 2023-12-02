@@ -94,7 +94,7 @@ class FileManager(BaseManager[File]):
     pass
 
 
-class GuestUserManager(BaseManager[File]):
+class GuestUserManager(BaseManager[GuestUser]):
     pass
 
 

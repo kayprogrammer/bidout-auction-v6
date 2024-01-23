@@ -7,6 +7,7 @@
 
 #### PG ADMIN: [Documentation](https://pgadmin.org) 
 
+#### Swagger: [Documentation](https://swagger.io/docs/)
 
 ## How to run locally
 
@@ -49,8 +50,8 @@ OR
 ```
 
 ## Docs
-#### API Url: [BidOut Docs](https://bidout-fastapi.vercel.app/) 
-#### Swagger: [Documentation](https://swagger.io/docs/)
+#### SWAGGER API Url: [BidOut Docs](https://bidout-fastapi.vercel.app/)
+#### POSTMAN API Url: [BidOut Docs](https://bit.ly/bidout-api)
 
 ![alt text](https://github.com/kayprogrammer/bidout-auction-v6/blob/main/display/display1.png?raw=true)
 

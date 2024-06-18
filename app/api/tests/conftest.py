@@ -64,7 +64,7 @@ async def client(database):
             await database.close()
 
     app.dependency_overrides[get_db] = overide_get_db
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(app=app, base_url="http://test/api/v6") as client:
         yield client
 
 

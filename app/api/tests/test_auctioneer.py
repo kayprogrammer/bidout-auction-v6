@@ -4,7 +4,7 @@ from app.api.utils.auth import Authentication
 from datetime import datetime, timedelta
 from pytz import UTC
 
-BASE_URL_PATH = "/api/v6/auctioneer"
+BASE_URL_PATH = "/auctioneer"
 
 
 async def test_profile_view(mocker, authorized_client, verified_user):

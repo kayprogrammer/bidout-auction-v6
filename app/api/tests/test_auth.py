@@ -1,7 +1,7 @@
 from app.db.managers.accounts import user_manager, jwt_manager, otp_manager
 from app.api.utils.auth import Authentication
 
-BASE_URL_PATH = "/api/v6/auth"
+BASE_URL_PATH = "/auth"
 
 
 async def test_register_user(mocker, client):

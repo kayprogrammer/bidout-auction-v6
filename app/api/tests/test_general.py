@@ -1,6 +1,6 @@
 from app.db.managers.general import review_manager
 
-BASE_URL_PATH = "/api/v6/general"
+BASE_URL_PATH = "/general"
 
 
 async def test_retrieve_sitedetail(client):

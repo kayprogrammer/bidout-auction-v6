@@ -2,7 +2,7 @@ from app.db.managers.accounts import jwt_manager
 from app.db.managers.listings import category_manager, watchlist_manager, bid_manager
 from app.api.utils.auth import Authentication
 
-BASE_URL_PATH = "/api/v6/listings"
+BASE_URL_PATH = "/listings"
 
 
 async def test_retrieve_all_listings(client, create_listing):
